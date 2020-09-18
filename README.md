@@ -1,6 +1,6 @@
 # parallel
 
-#### Run 
+#### Run MPI
 - mpicc -o merge_sort merge_sort.c
 - mpirun -np 4 ./merge_sort
 
