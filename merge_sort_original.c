@@ -1,81 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpi.h>
+#include <sys/time.h>
 
 void merge(int *, int, int, int);
 void mergeSort(int *, int, int);
 void printArray(int *, int);
 
-#define MASTER 0
-#define SIZE 20
+#define SIZE 200
 
 int main(int argc, char** argv)
 {
-    /********************* Initialize MPI ********************/
-    int myid, numprocs, i;
+    int i;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-
-    int *inputArray = malloc(SIZE * sizeof(int));
-    int size;
+    /***** Start time *****/
+    struct timeval tvalBefore, tvalAfter;
+    gettimeofday(&tvalBefore, NULL);
 
     /***** Create data for array *****/
-    if (myid == MASTER) {
-        for (i=0; i<SIZE; i++) {
-            inputArray[i] = rand()%100;
-        }
+    int *inputArray = malloc(SIZE * sizeof(int));
 
-        printf("Given array is:\n");
-        printArray(inputArray, SIZE);
-        printf("\n");
-
-        /***** Divide the array in chunks *****/
-        size = SIZE/numprocs;
+    for (i=0; i<SIZE; i++) {
+        inputArray[i] = rand()%100;
     }
 
-    /***** Send size to all processes *****/
-    MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    /***** Send each subarray to each process *****/
-    int *subArray = malloc(size * sizeof(int));
-    MPI_Scatter(inputArray, size, MPI_INT, subArray, size, MPI_INT, MASTER, MPI_COMM_WORLD);
-
-    /***** Show data in each process *****/
-    printf("\ndata in process[%d]\n", myid);
-    printArray(subArray, size);
+    printf("Given array is:\n");
+    printArray(inputArray, SIZE);
+    printf("\n");
 
     /***** Impliment merge sort on each process *****/
-    mergeSort(subArray, 0, size-1);
+    mergeSort(inputArray, 0, SIZE-1);
 
-    /***** Gather the sorted subarrays into one *****/
-    int *sortedArray = NULL;
+    /***** Display the sorted array *****/
+    printf("Sorted array is:\n");
+    printArray(inputArray, SIZE);
 
-    if (myid == MASTER) {
-        sortedArray = malloc(SIZE * sizeof(int));
-    }
+    /***** End time *****/
+    gettimeofday(&tvalAfter, NULL);
+    long tm = (tvalAfter.tv_sec - tvalBefore.tv_sec) * 1000000L + tvalAfter.tv_usec - tvalBefore.tv_usec;
 
-    MPI_Gather(subArray, size, MPI_INT, sortedArray, size, MPI_INT, MASTER, MPI_COMM_WORLD);
-
-    /***** Impliment merge sort for final array *****/
-    if (myid == MASTER) {
-        mergeSort(sortedArray, 0, SIZE-1);
-
-        /***** Display the sorted array *****/
-        printf("\n\n");
-        printf("Sorted array is:\n");
-        printArray(sortedArray, SIZE);
-    }
+    printf("\nSerial execution time: %ld microseconds\n", tm);
 
     /***** Release memory *****/
     free(inputArray);
-    free(subArray);
-    free(sortedArray);
-
-    /***** Finalize MPI *****/
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Finalize();
 
 	return 0;
 }
