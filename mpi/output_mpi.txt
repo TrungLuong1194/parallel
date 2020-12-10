@@ -1,0 +1,20 @@
+
+
+Size: 10000
+
+Time to execute: 0.010651
+
+
+Size: 10000
+
+Time to execute: 0.001950
+
+
+Size: 10000
+
+Time to execute: 0.003297
+
+
+Size: 10000
+
+Time to execute: 0.003253
