@@ -1,20 +1,15 @@
 
 
-Size: 10000
+Size: 100000
 
-Time to execute: 0.010651
-
-
-Size: 10000
-
-Time to execute: 0.001950
+Time to execute: 0.015334
 
 
-Size: 10000
+Size: 100000
 
-Time to execute: 0.003297
+Time to execute: 0.025796
 
 
-Size: 10000
+Size: 100000
 
-Time to execute: 0.003253
+Time to execute: 0.016967

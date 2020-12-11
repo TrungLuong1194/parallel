@@ -3,7 +3,7 @@
 #include <time.h>
 #include <mpi.h>
 
-#define SIZE 10000
+#define SIZE 100000
 #define MASTER 0
 
 void merge(int *, int, int, int);

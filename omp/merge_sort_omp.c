@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 #define SIZE 100000
 
@@ -11,10 +12,10 @@ void writeToFile(int *, int, FILE *);
 
 int main(int argc, char** argv) {
 
-    clock_t start, end;
+    double start, end;
     FILE *fp;
 
-    fp = fopen("output_seq.txt", "a+");
+    fp = fopen("output_omp.txt", "a+");
 
     // Allocate and initialize random data for array
     int *inputArray = malloc(SIZE * sizeof(int));
@@ -32,24 +33,24 @@ int main(int argc, char** argv) {
     // writeToFile(inputArray, SIZE, fp);
     // fprintf(fp, "\n");
 
-    start = clock();
+    start = omp_get_wtime();
 
     // Perform the merge sort
     mergeSort(inputArray, 0, SIZE-1);
 
-    end = clock();
+    end = omp_get_wtime();
 
     // fprintf(fp, "Sorted array is:\n");
     // fprintf(fp, "\n");
     // writeToFile(inputArray, SIZE, fp);
     // fprintf(fp, "\n");
 
-    fprintf(fp, "Time to execute: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
+    fprintf(fp, "Time to execute: %f\n", end - start);
 
     // Release memory
     free(inputArray);
 
-	return 0;
+    return 0;
 }
 
 
@@ -116,9 +117,20 @@ void mergeSort(int *arr, int left, int right) {
         // Same as (left+right)/2, but avoid overflow for large left and right
         int middle = left + (right - left) / 2;
 
-        // Sort first and second halves
-        mergeSort(arr, left, middle);
-        mergeSort(arr, middle + 1, right);
+        #pragma omp parallel sections num_threads(2)
+        {
+
+            // Sort first and second halves
+            #pragma omp section
+            {
+                mergeSort(arr, left, middle);
+            }
+
+            #pragma omp section
+            {
+                mergeSort(arr, middle + 1, right);
+            }
+        }
 
         merge(arr, left, middle, right);
     }
